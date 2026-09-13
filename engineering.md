@@ -79,3 +79,51 @@ attempts when diagnosing Neon connection errors from Colab.
 - **Config caching order.** `get_settings()` is `lru_cache`d at import, so
   environment injection must run before anything imports `app`. Otherwise a
   runtime restart is the only fix.
+
+
+## Phase 2 — Repository layer and public JSON API
+
+**Three section states, not two.** `SectionState` is `ready` | `empty` |
+`unavailable`. "Nothing published yet" and "the query failed" must never
+collapse into one value: if Neon is down, a section that *does* have content
+must not render "Coming soon" and quietly lie about it. `_fetch` catches
+`SQLAlchemyError` per section, so one failing table degrades alone instead of
+taking down the page.
+
+**Placeholder logic lives in one place.** The repository and API both return
+honest empty lists; the state value is computed once. Deciding "Coming soon" in
+nine Jinja templates would guarantee drift.
+
+**Response schemas separate from ORM models.** `id`, `display_order`,
+`is_published` and the timestamps are internal. Serialising ORM objects directly
+would publish draft state and ordering to anyone reading the API.
+
+**Cache headers are the uptime mechanism.** `s-maxage=300,
+stale-while-revalidate=86400` on every public read. Within 5 minutes the edge
+serves cached JSON with no function invocation; for 24 hours after that it
+serves stale content immediately while revalidating behind it. A Neon cold
+resume or outage is therefore invisible to visitors. This header does more for
+the free-tier uptime requirement than anything else in the stack.
+
+**Unknown sections cost no DB round trip.** `/api/v1/sections/nonsense` returned
+in 35ms vs ~2.25s for real sections: the `get_session` dependency constructs a
+Session but SQLAlchemy opens no connection until a query runs.
+
+**Bug: in-memory SQLite is per-connection, and TestClient uses another thread.**
+`create_engine("sqlite://")` defaults to `SingletonThreadPool`, which hands each
+thread its own connection — and for `sqlite://` a separate connection is a
+separate, empty database. TestClient runs the app on its own portal thread, so
+the app saw no tables (`no such table: social_links`) while the fixture engine
+had all nine. Fix: `poolclass=StaticPool` plus
+`connect_args={"check_same_thread": False}` so one connection is shared. Safe
+because StaticPool serialises access, and it is test-only — production is
+Postgres.
+
+Silver lining: the failure surfaced as `unavailable`, not `empty`, which is the
+degradation contract behaving correctly under a real fault rather than a
+simulated one.
+
+**Bug: inconsistent return type across success and failure paths.** `_fetch`
+returned `list` on success and `()` on failure, inside a `frozen=True`
+dataclass. Unified on `tuple`. The test asserting `()` was right; the code was
+wrong.
