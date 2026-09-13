@@ -24,9 +24,9 @@ templates.env.filters["monthyear"] = _month_year
 _settings = get_settings()
 
 DEFAULT_STATEMENT = [
-    "I build backend systems:",
-    "caches, message pipelines,",
-    "and query engines.",
+    "I write backend code.",
+    "This page is the most",
+    "frontend I have ever done.",
 ]
 
 _CACHE_CONTROL = (

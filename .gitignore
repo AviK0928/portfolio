@@ -1,7 +1,13 @@
 .env
+.env.*
+!.env.example
 __pycache__/
 .venv/
 *.pyc
 .pytest_cache/
 .vercel/
 *.ipynb
+*.pem
+*.key
+secrets.json
+credentials.json

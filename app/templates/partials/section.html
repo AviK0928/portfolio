@@ -1,11 +1,11 @@
-{% macro shell(name, section, empty_copy) %}
-<section class="section" id="{{ name|lower|replace(' ', '-') }}">
+{% macro shell(id, name, section, empty_copy) %}
+<section class="section" id="{{ id }}">
   <div class="section__rule">
     <h2 class="section__name">{{ name }}</h2>
     {% if section.state.value == 'empty' %}
-      <p class="section__state">Coming soon</p>
+      <p class="section__state">In the backlog</p>
     {% elif section.state.value == 'unavailable' %}
-      <p class="section__state">Temporarily unavailable</p>
+      <p class="section__state section__state--down">Temporarily unavailable</p>
     {% endif %}
   </div>
 

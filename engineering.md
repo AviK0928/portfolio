@@ -248,3 +248,37 @@ publish that.
 **Colab: subprocesses inherit the environment at spawn.** Setting a secret in the
 notebook after starting uvicorn has no effect on the running server — it must be
 restarted. The empty-token 503s were this, not a defect.
+
+
+## Phase 3c — Voice, and removing the seed script
+
+**Jokes for empty, plain language for broken.** Empty-state copy is now
+informal ("In the backlog", "It's all still in the write-ahead log"), but the
+`unavailable` state stays deliberately plain. If a genuine database failure also
+cracked a joke, a visitor could not distinguish a broken site from a bare one.
+Pinned by `test_failure_copy_stays_plain`, which asserts the humorous strings are
+absent from a failed section.
+
+**State badges rather than bare text.** The state now renders as a bordered pill,
+with `unavailable` in the accent colour. Grey text beside a heading reads as an
+error message; a pill reads as deliberate interface. The visual treatment is
+doing the same job as the copy split.
+
+**Explicit section ids.** The macro took `name` and slugified it for the id.
+Once section names carried apostrophes ("Things I've shipped") that produced
+invalid HTML ids, so ids are now passed explicitly and independently of the
+display name.
+
+**Three of seven headers carry jokes.** Every header being funny gets tiring by
+the third scroll; the straight ones make the others land.
+
+**Seed script deleted.** `scripts/seed_dev.py` hardcoded content that would drift
+from the database and contained placeholder contact details that would have been
+wrong if ever run against production. The admin API replaces it.
+
+**README and repo hygiene.** Added a README covering the architecture rationale.
+Audited the working tree and full git history for credentials: the only matches
+were the literal `USER:PASSWORD` placeholder in `.env.example`. No notebook was
+ever committed — `*.ipynb` was gitignored from the first commit, which matters
+because cell outputs persist inside the file and `git remote -v` output would
+have exposed a PAT.

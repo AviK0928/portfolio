@@ -2,17 +2,17 @@ import datetime as dt
 
 from app import models
 
-SECTION_NAMES = [
-    "Projects", "Experience", "Problem solving", "Writing",
-    "Skills", "Certifications", "Education",
+SECTION_IDS = [
+    "projects", "experience", "problem-solving", "writing",
+    "skills", "certifications", "education",
 ]
 
 
 def test_all_sections_present_and_empty(client):
     body = client.get("/").text
-    for name in SECTION_NAMES:
-        assert f">{name}<" in body, name
-    assert body.count("Coming soon") == len(SECTION_NAMES)
+    for section_id in SECTION_IDS:
+        assert f'id="{section_id}"' in body, section_id
+    assert body.count("In the backlog") == len(SECTION_IDS)
 
 
 def test_project_datasheet_renders_all_fields(client, session):
@@ -33,8 +33,7 @@ def test_current_role_shows_present(client, session):
         start_date=dt.date(2026, 1, 1), end_date=None,
     ))
     session.commit()
-    body = client.get("/").text
-    assert "Jan 2026 – Present" in body
+    assert "Jan 2026 – Present" in client.get("/").text
 
 
 def test_skills_group_by_category(client, session):
@@ -44,8 +43,7 @@ def test_skills_group_by_category(client, session):
         models.Skill(category="Data", name="Redis", display_order=3),
     ])
     session.commit()
-    body = client.get("/").text
-    assert body.count("skillgroup__name") == 2
+    assert client.get("/").text.count("skillgroup__name") == 2
 
 
 def test_dsa_missing_count_shows_dash(client, session):

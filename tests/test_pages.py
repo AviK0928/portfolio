@@ -17,8 +17,8 @@ def test_index_renders_with_empty_db(client):
     r = client.get("/")
     assert r.status_code == 200
     assert "text/html" in r.headers["content-type"]
-    assert "Coming soon" in r.text
-    assert "Nothing published here yet." in r.text
+    assert "In the backlog" in r.text
+    assert "write-ahead log" in r.text
 
 
 def test_index_sets_cache_headers(client):
@@ -51,8 +51,8 @@ def test_ready_section_renders_content_not_placeholder(client, session):
     session.commit()
     projects = section_html(client.get("/").text, "projects")
     assert "RedisGo" in projects
-    assert "Coming soon" not in projects
-    assert "Nothing published here yet." not in projects
+    assert "In the backlog" not in projects
+    assert "write-ahead log" not in projects
 
 
 def test_unavailable_section_does_not_claim_empty(client, monkeypatch):
@@ -65,5 +65,19 @@ def test_unavailable_section_does_not_claim_empty(client, monkeypatch):
     monkeypatch.setattr("app.pages.repo.get_projects", boom)
     projects = section_html(client.get("/").text, "projects")
     assert "Temporarily unavailable" in projects
-    assert "Coming soon" not in projects
-    assert "Nothing published here yet." not in projects
+    assert "In the backlog" not in projects
+    assert "write-ahead log" not in projects
+
+
+def test_failure_copy_stays_plain(client, monkeypatch):
+    """A real failure must not crack a joke — users can't tell broken from bare."""
+    from app import repository
+
+    monkeypatch.setattr(
+        "app.pages.repo.get_projects",
+        lambda _s: repository.Section(repository.SectionState.UNAVAILABLE, ()),
+    )
+    projects = section_html(client.get("/").text, "projects")
+    assert "Temporarily unavailable" in projects
+    assert "write-ahead log" not in projects
+    assert "In the backlog" not in projects

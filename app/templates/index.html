@@ -9,7 +9,8 @@
   {% if profile and profile.bio %}<p class="hero__bio prose">{{ profile.bio }}</p>{% endif %}
 </section>
 
-{% call ui.shell("Projects", projects, "Nothing published here yet.") %}
+{% call ui.shell("projects", "Things I've shipped", projects,
+                 "Nothing published yet. It's all still in the write-ahead log.") %}
   <div>
   {% for p in projects.items %}
     <article class="project">
@@ -37,7 +38,8 @@
   </div>
 {% endcall %}
 
-{% call ui.shell("Experience", experience, "No roles listed yet.") %}
+{% call ui.shell("experience", "Where I've worked", experience,
+                 "No roles listed yet. Employment history pending.") %}
   <ul class="plain">
   {% for e in experience.items %}
     <li>
@@ -52,7 +54,8 @@
   </ul>
 {% endcall %}
 
-{% call ui.shell("Problem solving", dsa, "No practice profiles linked yet.") %}
+{% call ui.shell("problem-solving", "The algorithm grind", dsa,
+                 "No profiles linked. My rating is a private matter.") %}
   <table class="table">
     <thead><tr><th>Platform</th><th>Handle</th><th>Solved</th></tr></thead>
     <tbody>
@@ -67,7 +70,8 @@
   </table>
 {% endcall %}
 
-{% call ui.shell("Writing", blogs, "No posts yet.") %}
+{% call ui.shell("writing", "Writing", blogs,
+                 "Drafts exist. Publishing turns out to be the hard part.") %}
   <ul class="plain">
   {% for b in blogs.items %}
     <li>
@@ -79,7 +83,8 @@
   </ul>
 {% endcall %}
 
-{% call ui.shell("Skills", skills, "Nothing listed yet.") %}
+{% call ui.shell("skills", "The buzzword section", skills,
+                 "Skill issue. Being worked on.") %}
   <div>
   {% set grouped = skills.items|groupby("category")|list %}
   {% for category in skill_order + (grouped|map(attribute=0)|reject("in", skill_order)|list) %}
@@ -93,7 +98,8 @@
   </div>
 {% endcall %}
 
-{% call ui.shell("Certifications", certifications, "None listed yet.") %}
+{% call ui.shell("certifications", "Certifications", certifications,
+                 "None yet. Just vibes and Stack Overflow.") %}
   <ul class="plain">
   {% for c in certifications.items %}
     <li>
@@ -104,7 +110,8 @@
   </ul>
 {% endcall %}
 
-{% call ui.shell("Education", education, "Nothing listed yet.") %}
+{% call ui.shell("education", "Education", education,
+                 "Nothing listed yet.") %}
   <ul class="plain">
   {% for ed in education.items %}
     <li>
