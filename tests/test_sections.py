@@ -60,3 +60,15 @@ def test_socials_render_in_footer(client, session):
     session.commit()
     body = client.get("/").text
     assert "GitHub" in body and "socials" in body
+
+
+def test_live_link_carries_cold_start_caveat(client, session):
+    """A live demo on a free tier needs the wait stated, or it reads as broken."""
+    session.add(models.Project(
+        title="Invoice Generator", summary="microservices",
+        live_url="https://example.onrender.com",
+    ))
+    session.commit()
+    body = client.get("/").text
+    assert "Live demo" in body
+    assert "cold start" in body or "first load" in body

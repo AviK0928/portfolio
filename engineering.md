@@ -282,3 +282,25 @@ were the literal `USER:PASSWORD` placeholder in `.env.example`. No notebook was
 ever committed — `*.ipynb` was gitignored from the first commit, which matters
 because cell outputs persist inside the file and `git remote -v` output would
 have exposed a PAT.
+
+
+## Phase 3d — Live demo links and their caveat
+
+**Free-tier cold starts stated, not hidden.** Two projects are deployed on
+Render's free tier, which spins down after 15 minutes idle with a 30–60s cold
+start. An unlabelled "Live" link means a recruiter opens a blank tab, waits, and
+closes it — worse than no link. The label is now "Live demo" with a muted "first
+load ~1 min, free tier" beside it, so the wait is expected rather than read as
+broken.
+
+Same principle as the section states: an honest label turns an apparent fault
+into understood behaviour. It is also the exact trade-off that drove this site
+onto Vercel rather than Render in the first place.
+
+**Caveat sits outside the anchor.** Inside the link it would inherit the
+underline and accent colour and read as a second link. Outside it, the existing
+`spec__inline` flex gap spaces it correctly.
+
+**Pinned by a test.** `test_live_link_carries_cold_start_caveat` asserts the
+caveat renders whenever a project has a `live_url`, so it cannot silently
+disappear in a future template edit.

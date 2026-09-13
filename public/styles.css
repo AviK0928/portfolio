@@ -170,3 +170,5 @@ a:hover { color: var(--paper); }
 .section__state--down { border-color: var(--amber); color: var(--amber); }
 
 .colophon { margin-top: 1.25rem; color: var(--muted); font-size: 0.8125rem; max-width: var(--measure); }
+
+.caveat { color: var(--muted); font-size: 0.8125rem; }
