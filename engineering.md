@@ -304,3 +304,42 @@ underline and accent colour and read as a second link. Outside it, the existing
 **Pinned by a test.** `test_live_link_carries_cold_start_caveat` asserts the
 caveat renders whenever a project has a `live_url`, so it cannot silently
 disappear in a future template edit.
+
+
+## Phase 5 — Deployment
+
+**Live at portfolio-cyan-phi-82.vercel.app.** Vercel Python runtime, function
+pinned to `sin1`, Neon in `ap-southeast-1`.
+
+**Bug: the vercel.json rewrite broke all routing.** Every path returned
+`{"detail":"Not Found"}` — FastAPI's own 404 body, not Vercel's HTML 404, which
+proved the function was deployed and receiving requests but matching no route.
+Cause: `"rewrites": [{"source": "/(.*)", "destination": "/api/index"}]` rewrote
+the request path before the function ran, so FastAPI saw `/api/index` for every
+request including `/`. Vercel's zero-config FastAPI routing preserves the
+original path and needs no rewrite. Removed the rewrite, kept `regions`.
+
+Diagnostic worth keeping: a JSON 404 body means your app is running and routing
+is wrong; an HTML 404 means the request never reached your app.
+
+**Latency prediction confirmed.** `x-vercel-id` reads `fra1::sin1` — edge in
+Frankfurt, function in Singapore. All endpoints returned in ~0.45s measured from
+a US Colab VM, against 2.5s locally. The Phase 1 analysis said the 2.5s was
+round-trip count rather than database speed and that co-location would remove
+it; it did.
+
+**Cache directives are consumed at the edge.** Downstream `cache-control` reads
+only `public` — Vercel strips `s-maxage` and `stale-while-revalidate` after
+applying them. `x-vercel-cache` (MISS then HIT) is the header that actually
+confirms caching, not `cache-control`.
+
+**Dependency pins nearly shipped as ranges.** `requirements.txt` still held the
+version ranges used for the first install; the frozen pins had been computed but
+never written to disk. Caught during the pre-deploy check. Ranges would have let
+Vercel resolve a different dependency set at build time than the 54 tests ran
+against — and a Starlette signature change had already broken this project once.
+
+**Trailing slash produces 308s.** `SITE` with a trailing slash makes every path
+a double slash, which Vercel redirects. Two verification runs were misread as
+auth failures before this was spotted; `follow_redirects=True` on diagnostic
+requests avoids it.
