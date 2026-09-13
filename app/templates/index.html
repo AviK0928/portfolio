@@ -10,9 +10,111 @@
 </section>
 
 {% call ui.shell("Projects", projects, "Nothing published here yet.") %}
-  {# Placeholder body — replaced by the datasheet treatment in Phase 3b. #}
-  <ul class="stack">
-    {% for p in projects.items %}<li>{{ p.title }}</li>{% endfor %}
+  <div>
+  {% for p in projects.items %}
+    <article class="project">
+      <h3 class="project__title">{{ p.title }}</h3>
+      <p class="project__summary">{{ p.summary }}</p>
+      <dl class="spec">
+        {% if p.tech_stack %}
+        <dt>Stack</dt>
+        <dd><div class="spec__inline">{% for t in p.tech_stack %}<span>{{ t }}</span>{% endfor %}</div></dd>
+        {% endif %}
+        {% if p.highlights %}
+        <dt>Notes</dt>
+        <dd><ul>{% for h in p.highlights %}<li>{{ h }}</li>{% endfor %}</ul></dd>
+        {% endif %}
+        {% if p.repo_url or p.live_url %}
+        <dt>Links</dt>
+        <dd><div class="spec__inline">
+          {% if p.repo_url %}<a href="{{ p.repo_url }}">Source</a>{% endif %}
+          {% if p.live_url %}<a href="{{ p.live_url }}">Live</a>{% endif %}
+        </div></dd>
+        {% endif %}
+      </dl>
+    </article>
+  {% endfor %}
+  </div>
+{% endcall %}
+
+{% call ui.shell("Experience", experience, "No roles listed yet.") %}
+  <ul class="plain">
+  {% for e in experience.items %}
+    <li>
+      <div class="entry__head">
+        <h3 class="entry__role">{{ e.role }}</h3>
+        <p class="entry__org">{{ e.org }}{% if e.location %}, {{ e.location }}{% endif %}</p>
+        <p class="entry__dates">{{ e.start_date|monthyear }} – {{ e.end_date|monthyear }}</p>
+      </div>
+      {% if e.bullets %}<ul class="entry__bullets">{% for b in e.bullets %}<li>{{ b }}</li>{% endfor %}</ul>{% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% endcall %}
+
+{% call ui.shell("Problem solving", dsa, "No practice profiles linked yet.") %}
+  <table class="table">
+    <thead><tr><th>Platform</th><th>Handle</th><th>Solved</th></tr></thead>
+    <tbody>
+    {% for d in dsa.items %}
+      <tr>
+        <td><a href="{{ d.profile_url }}">{{ d.platform }}</a></td>
+        <td class="handle">{{ d.handle }}</td>
+        <td>{{ d.problems_solved if d.problems_solved is not none else "—" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endcall %}
+
+{% call ui.shell("Writing", blogs, "No posts yet.") %}
+  <ul class="plain">
+  {% for b in blogs.items %}
+    <li>
+      <a href="{{ b.url }}">{{ b.title }}</a>
+      {% if b.summary %}<p class="meta">{{ b.summary }}</p>{% endif %}
+      {% if b.published_at %}<p class="meta">{{ b.published_at|monthyear }}</p>{% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% endcall %}
+
+{% call ui.shell("Skills", skills, "Nothing listed yet.") %}
+  <div>
+  {% set grouped = skills.items|groupby("category")|list %}
+  {% for category in skill_order + (grouped|map(attribute=0)|reject("in", skill_order)|list) %}
+  {% for _c, items in grouped if _c == category %}
+    <div class="skillgroup">
+      <p class="skillgroup__name">{{ category }}</p>
+      <ul class="skillgroup__items">{% for s in items %}<li>{{ s.name }}</li>{% endfor %}</ul>
+    </div>
+  {% endfor %}
+  {% endfor %}
+  </div>
+{% endcall %}
+
+{% call ui.shell("Certifications", certifications, "None listed yet.") %}
+  <ul class="plain">
+  {% for c in certifications.items %}
+    <li>
+      {% if c.credential_url %}<a href="{{ c.credential_url }}">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}
+      <p class="meta">{{ c.issuer }}{% if c.issued_on %} · {{ c.issued_on|monthyear }}{% endif %}</p>
+    </li>
+  {% endfor %}
+  </ul>
+{% endcall %}
+
+{% call ui.shell("Education", education, "Nothing listed yet.") %}
+  <ul class="plain">
+  {% for ed in education.items %}
+    <li>
+      <div class="entry__head">
+        <h3 class="entry__role">{{ ed.degree }}</h3>
+        <p class="entry__dates">{{ ed.start_date|monthyear }} – {{ ed.end_date|monthyear }}</p>
+      </div>
+      <p class="meta">{{ ed.institute }}{% if ed.score %} · {{ ed.score }}{% endif %}</p>
+    </li>
+  {% endfor %}
   </ul>
 {% endcall %}
 {% endblock %}

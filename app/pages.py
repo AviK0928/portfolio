@@ -13,6 +13,14 @@ from app.db import get_session
 router = APIRouter(tags=["pages"])
 templates = Jinja2Templates(directory="app/templates")
 
+
+def _month_year(value) -> str:
+    """Dates render as 'Jan 2026'; a missing end date means the role is current."""
+    return value.strftime("%b %Y") if value else "Present"
+
+
+templates.env.filters["monthyear"] = _month_year
+
 _settings = get_settings()
 
 DEFAULT_STATEMENT = [
@@ -41,6 +49,7 @@ def index(request: Request, session: Session = Depends(get_session)):
         "dsa": repo.get_dsa_profiles(session),
         "blogs": repo.get_blogs(session),
         "skills": repo.get_skills(session),
+        "skill_order": ["Languages", "Backend", "Data", "Infra"],
         "certifications": repo.get_certifications(session),
         "education": repo.get_education(session),
         "socials": repo.get_social_links(session),

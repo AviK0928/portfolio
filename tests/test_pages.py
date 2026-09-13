@@ -1,7 +1,16 @@
-import pytest
-from sqlalchemy.exc import SQLAlchemyError
+import re
 
 from app import models
+
+
+def section_html(body: str, section_id: str) -> str:
+    """Isolate one section. Page-wide assertions break as sections are added."""
+    match = re.search(
+        rf'<section class="section" id="{section_id}">(.*?)</section>',
+        body, re.DOTALL,
+    )
+    assert match, f"section {section_id!r} not found"
+    return match.group(1)
 
 
 def test_index_renders_with_empty_db(client):
@@ -20,12 +29,12 @@ def test_index_sets_cache_headers(client):
 def test_index_uses_profile_when_present(client, session):
     session.add(models.SiteProfile(
         id=1, name="Aviraj Khanchi", headline="Backend Engineer",
-        location="Delhi, India", email="a@example.com", bio="Systems and backends.",
+        location="Rohtak, India", email="a@example.com", bio="Systems and backends.",
     ))
     session.commit()
     body = client.get("/").text
     assert "Aviraj Khanchi" in body
-    assert "Delhi, India" in body
+    assert "Rohtak, India" in body
     assert "Systems and backends." in body
 
 
@@ -40,9 +49,10 @@ def test_stylesheet_is_linked(client):
 def test_ready_section_renders_content_not_placeholder(client, session):
     session.add(models.Project(title="RedisGo", summary="Redis-compatible cache"))
     session.commit()
-    body = client.get("/").text
-    assert "RedisGo" in body
-    assert "Coming soon" not in body
+    projects = section_html(client.get("/").text, "projects")
+    assert "RedisGo" in projects
+    assert "Coming soon" not in projects
+    assert "Nothing published here yet." not in projects
 
 
 def test_unavailable_section_does_not_claim_empty(client, monkeypatch):
@@ -53,7 +63,7 @@ def test_unavailable_section_does_not_claim_empty(client, monkeypatch):
         return repository.Section(repository.SectionState.UNAVAILABLE, ())
 
     monkeypatch.setattr("app.pages.repo.get_projects", boom)
-    body = client.get("/").text
-    assert "Temporarily unavailable" in body
-    assert "Coming soon" not in body
-    assert "Nothing published here yet." not in body
+    projects = section_html(client.get("/").text, "projects")
+    assert "Temporarily unavailable" in projects
+    assert "Coming soon" not in projects
+    assert "Nothing published here yet." not in projects

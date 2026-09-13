@@ -163,3 +163,41 @@ or the macro cannot see template variables and `caller()` breaks.
 around an empty paragraph when no profile row existed — a rule with nothing under
 it. Same principle as "Coming soon": absent content should look deliberate, not
 broken.
+
+
+## Phase 3b — Section bodies
+
+**One treatment carries the design.** Projects render as a datasheet: a label
+column (Stack / Notes / Links) against hairline-separated rows. Every other
+section stays deliberately plainer, so the density itself signals which content
+matters most. Nine identically-styled cards would have flattened that hierarchy.
+
+**A table where the data is genuinely tabular.** Problem-solving profiles get a
+real `<table>` because platform/handle/count is column data. Missing counts
+render an em dash rather than being hidden — an absent number is information.
+
+**Section named for the reader, not the domain.** "Problem solving" rather than
+"DSA": the acronym is regional, and LeetCode in the table communicates the same
+thing to everyone.
+
+**Bug: `groupby` discards `display_order`.** Jinja's `groupby` sorts by the
+grouping key, so skill categories came out alphabetical (Backend, Data, Infra,
+Languages) and ignored the ordering column. Fixed with an explicit
+`skill_order` list in the page context, with unlisted categories appended after
+it — adding a category needs no code change.
+
+**Bug: nested lists inherit second-level markers.** Experience bullets rendered
+as hollow circles because the `<ul>` sits inside a flex item; the datasheet's
+own bullets rendered solid. Set `list-style: disc` explicitly rather than
+relying on the browser default.
+
+**Tests scoped to a section, not the page.** Two Phase 3a tests asserted
+`"Coming soon" not in body`. Correct when Projects was the only section; wrong
+once six others were legitimately empty. Fixed with a `section_html()` helper
+that extracts one section by id — loosening the assertions instead would have
+let a real regression through, since a section rendering both content and its
+placeholder would still pass.
+
+**Seed script gated behind an explicit opt-in.** `scripts/seed_dev.py` exits
+unless `SEED_DEV=yes`. It exists only so the design could be reviewed with real
+content, and is superseded by the admin API in Phase 4.
