@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from sqlalchemy import text
 
+from app.admin import router as admin_router
 from app.api import router as public_router
 from app.config import get_settings
 from app.db import engine
@@ -11,6 +12,7 @@ from app.pages import router as pages_router
 def create_app() -> FastAPI:
     app = FastAPI(title="Portfolio", docs_url=None, redoc_url=None, openapi_url=None)
     app.include_router(public_router)
+    app.include_router(admin_router)
     app.include_router(pages_router)
 
     @app.get("/healthz")

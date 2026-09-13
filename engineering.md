@@ -201,3 +201,50 @@ placeholder would still pass.
 **Seed script gated behind an explicit opt-in.** `scripts/seed_dev.py` exits
 unless `SEED_DEV=yes`. It exists only so the design could be reviewed with real
 content, and is superseded by the admin API in Phase 4.
+
+
+## Phase 4 — Admin API
+
+**Auth fails closed.** Two dependencies rather than one: `require_configured_token`
+returns 503 when `ADMIN_API_TOKEN` is unset or blank, and `require_admin` returns
+401 on a bad token. Misconfiguration and bad credentials are different failures
+and deserve different codes — and more importantly, an unset token must lock the
+API rather than open it. With a single equality check, an unset token would be
+the empty string and a request sending an empty bearer would authenticate.
+Verified live: with no token configured, every header shape returned 503,
+including a request carrying a wrong token.
+
+**Constant-time token comparison.** `secrets.compare_digest`, not `==`. Equality
+short-circuits on the first differing byte, leaking token content through
+response timing.
+
+**Separate input and output schemas.** `ProjectIn` accepts `display_order` and
+`is_published`; `ProjectOut` exposes neither. One shared schema would force a
+choice between leaking internal fields publicly and making ordering unsettable.
+Inputs use `extra="forbid"` so a typo'd field name is rejected rather than
+silently ignored.
+
+**Bug: runtime validation skips FastAPI's error translation.** Because the schema
+is selected at runtime from the path, validation happens inside the handler via
+`model_validate` rather than during request parsing. FastAPI only converts
+`RequestValidationError` into a 422 for validation it runs itself, so a bare
+`pydantic.ValidationError` propagated as an unhandled exception — a client
+sending a typo'd field would have received a 500 with no indication of which
+field was wrong. Fixed with a `_validate()` helper translating to
+`HTTPException(422, detail=exc.errors(include_url=False))`. General trap for any
+API that dispatches schemas by path.
+
+The two tests that caught it only asserted status codes, which is exactly how a
+500-shaped bug hides behind 422-shaped intent. Added a test asserting the
+response body names the offending field.
+
+**`include_url=False` on error payloads.** The pydantic default embeds a docs
+link carrying the library and version in every validation error. No reason to
+publish that.
+
+**Starlette renamed `HTTP_422_UNPROCESSABLE_ENTITY` to
+`HTTP_422_UNPROCESSABLE_CONTENT`**, matching RFC 9110. Same code, new constant.
+
+**Colab: subprocesses inherit the environment at spawn.** Setting a secret in the
+notebook after starting uvicorn has no effect on the running server — it must be
+restarted. The empty-token 503s were this, not a defect.

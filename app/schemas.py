@@ -87,3 +87,91 @@ class EducationOut(_Out):
 class SectionOut[T](_Out):
     state: str
     items: list[T]
+
+
+# --------------------------------------------------------------------------
+# Admin input schemas. Deliberately distinct from the *Out schemas above:
+# these accept display_order and is_published, which outputs never expose.
+# --------------------------------------------------------------------------
+
+
+class _In(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    display_order: int = 0
+    is_published: bool = True
+
+
+class ProfileIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    headline: str
+    bio: str | None = None
+    location: str | None = None
+    email: str | None = None
+    resume_url: str | None = None
+
+
+class SocialLinkIn(_In):
+    platform: str
+    url: str
+    icon: str | None = None
+
+
+class ProjectIn(_In):
+    title: str
+    summary: str
+    tech_stack: list[str] = []
+    highlights: list[str] = []
+    repo_url: str | None = None
+    live_url: str | None = None
+    is_featured: bool = False
+
+
+class ExperienceIn(_In):
+    org: str
+    role: str
+    kind: str = "work"
+    location: str | None = None
+    start_date: dt.date
+    end_date: dt.date | None = None
+    bullets: list[str] = []
+
+
+class DsaProfileIn(_In):
+    platform: str
+    handle: str
+    profile_url: str
+    rating: int | None = None
+    problems_solved: int | None = None
+    badge: str | None = None
+    last_synced_at: dt.datetime | None = None
+
+
+class BlogIn(_In):
+    title: str
+    url: str
+    summary: str | None = None
+    published_at: dt.date | None = None
+    tags: list[str] = []
+
+
+class SkillIn(_In):
+    category: str
+    name: str
+
+
+class CertificationIn(_In):
+    name: str
+    issuer: str
+    issued_on: dt.date | None = None
+    credential_url: str | None = None
+
+
+class EducationIn(_In):
+    institute: str
+    degree: str
+    start_date: dt.date | None = None
+    end_date: dt.date | None = None
+    score: str | None = None
