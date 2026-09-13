@@ -1,0 +1,20 @@
+{% macro shell(name, section, empty_copy) %}
+<section class="section" id="{{ name|lower|replace(' ', '-') }}">
+  <div class="section__rule">
+    <h2 class="section__name">{{ name }}</h2>
+    {% if section.state.value == 'empty' %}
+      <p class="section__state">Coming soon</p>
+    {% elif section.state.value == 'unavailable' %}
+      <p class="section__state">Temporarily unavailable</p>
+    {% endif %}
+  </div>
+
+  {% if section.state.value == 'ready' %}
+    {{ caller() }}
+  {% elif section.state.value == 'empty' %}
+    <p class="section__empty">{{ empty_copy }}</p>
+  {% else %}
+    <p class="section__empty">This section couldn’t be loaded. Reload in a moment.</p>
+  {% endif %}
+</section>
+{% endmacro %}

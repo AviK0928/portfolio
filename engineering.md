@@ -127,3 +127,39 @@ simulated one.
 returned `list` on success and `()` on failure, inside a `frozen=True`
 dataclass. Unified on `tuple`. The test asserting `()` was right; the code was
 wrong.
+
+
+## Phase 3a — Stylesheet, layout shell, section states
+
+**Reversed the Tailwind decision.** Tailwind's value is constraint across a large
+utility surface; this design is ~250 lines of CSS behind six custom properties,
+where the design system itself is the constraint. Against that, Tailwind costs a
+pinned standalone binary, a build step before every commit, and a generated
+artifact in git. Plain CSS in `public/styles.css` is served by Vercel's CDN and
+never touches the function.
+
+**Section state is rendered structurally.** The rule above each section carries
+its name at the left and its state at the right: nothing when ready, "Coming
+soon" when empty, "Temporarily unavailable" when the query failed. The Phase 2
+three-state model becomes visible rather than hidden, and the failure copy never
+claims the section is empty.
+
+**Every section is fetched in one request.** Nine repository calls share one
+connection. Fetching sections from the browser over the JSON API would pay nine
+round trips and leave the page blank until JS ran.
+
+**Bug: Starlette 1.x changed the TemplateResponse signature.** The old
+`TemplateResponse(name, context)` is gone; the current form is
+`TemplateResponse(request, name, context)`. Passing the old positional order made
+Jinja treat the context dict as a template name — `TypeError: unhashable type:
+dict` from the template cache, with nothing in the traceback pointing at the
+signature. Now called with keyword arguments, so a future signature change fails
+loudly instead of misbinding.
+
+**Bug: macro imported without context.** `{% import %}` must carry `with context`
+or the macro cannot see template variables and `caller()` breaks.
+
+**Empty containers must not render their chrome.** The footer drew its top border
+around an empty paragraph when no profile row existed — a rule with nothing under
+it. Same principle as "Coming soon": absent content should look deliberate, not
+broken.

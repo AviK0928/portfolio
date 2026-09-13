@@ -1,0 +1,97 @@
+:root {
+  --ink: #0B1020;
+  --surface: #121829;
+  --rule: #2A3348;
+  --paper: #E8EAF0;
+  --muted: #8A93A8;
+  --amber: #E0A45C;
+
+  --serif: "Newsreader", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --measure: 68ch;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --step: clamp(3.5rem, 9vh, 6rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font: 400 1.0625rem/1.65 var(--sans);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--amber); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { color: var(--paper); }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+.wrap { max-width: 62rem; margin: 0 auto; padding: 0 var(--gutter); }
+.prose { max-width: var(--measure); }
+
+/* ---------- masthead ---------- */
+.masthead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1.5rem; flex-wrap: wrap;
+  padding: 2rem 0 0;
+}
+.masthead__name { font: 500 1rem/1 var(--sans); letter-spacing: 0.01em; margin: 0; }
+.masthead__meta { color: var(--muted); font-size: 0.9375rem; margin: 0; }
+
+/* ---------- hero ---------- */
+.hero { padding: var(--step) 0 calc(var(--step) * 1.1); }
+.hero__statement {
+  font: 300 clamp(2rem, 5.5vw, 3.4rem)/1.18 var(--serif);
+  letter-spacing: -0.015em;
+  margin: 0;
+  max-width: 20ch;
+}
+.hero__statement span { display: block; }
+.hero__bio { color: var(--muted); margin: 2rem 0 0; max-width: var(--measure); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__statement span { animation: rise 0.7s cubic-bezier(.2,.7,.3,1) backwards; }
+  .hero__statement span:nth-child(1) { animation-delay: 0.05s; }
+  .hero__statement span:nth-child(2) { animation-delay: 0.15s; }
+  .hero__statement span:nth-child(3) { animation-delay: 0.25s; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(0.5em); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* ---------- section shell ---------- */
+.section { padding: 0 0 var(--step); }
+
+.section__rule {
+  display: flex; align-items: baseline; gap: 1rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.75rem; margin-bottom: 2rem;
+}
+.section__name { font: 500 0.9375rem/1 var(--sans); margin: 0; }
+.section__state { margin: 0 0 0 auto; color: var(--muted); font-size: 0.875rem; }
+
+.section__empty { color: var(--muted); margin: 0; max-width: var(--measure); }
+
+/* ---------- shared primitives (used by Phase 3b) ---------- */
+.stack > * + * { margin-top: 2.25rem; }
+.handle { font-family: var(--mono); font-size: 0.9375rem; }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 1.5rem;
+}
+
+/* ---------- footer ---------- */
+.footer {
+  border-top: 1px solid var(--rule);
+  padding: 1.5rem 0 3rem;
+  color: var(--muted); font-size: 0.9375rem;
+}

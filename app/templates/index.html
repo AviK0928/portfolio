@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "partials/section.html" as ui with context %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero__statement">
+    {% for line in statement_lines %}<span>{{ line }}</span>{% endfor %}
+  </h1>
+  {% if profile and profile.bio %}<p class="hero__bio prose">{{ profile.bio }}</p>{% endif %}
+</section>
+
+{% call ui.shell("Projects", projects, "Nothing published here yet.") %}
+  {# Placeholder body — replaced by the datasheet treatment in Phase 3b. #}
+  <ul class="stack">
+    {% for p in projects.items %}<li>{{ p.title }}</li>{% endfor %}
+  </ul>
+{% endcall %}
+{% endblock %}
